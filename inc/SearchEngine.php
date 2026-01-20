@@ -88,6 +88,14 @@ final class SearchEngine
         */
         $like = '%' . $wpdb->esc_like($term) . '%';
 
+        /* Normalizamos el término para ignorar separadores (espacios, guiones, /, etc.).
+         * Esto permite que "11520-P6" o "11520P6" coincida con títulos como "11590/11520 P6".
+        */
+        $normalized_term = preg_replace('/[^a-zA-Z0-9]/', '', $term);
+        $normalized_like = $normalized_term !== ''
+            ? '%' . $wpdb->esc_like($normalized_term) . '%'
+            : '';
+
         /* Con el patrón de búsqueda armado, reemplazaremos la instrucción WHERE
         del query (llamada $search). Se usa el método prepare() para asegurar que 
         todo esté donde tiene que estar.  
@@ -101,17 +109,20 @@ final class SearchEngine
             Esta string de condición está en SQL. Aquí, dos strings separadas
             por un punto (ejemplo: wp_table.title) significan tabla a buscar y columna
             de búsqueda. LIKE buscará el patrón $like en las 3 columnas que pedimos.
+            También agregamos una comparación normalizada del título (sin espacios, /, -),
+            para que coincidan búsquedas como "11520-P6" con "11590/11520 P6".
             */
             " AND ({$wpdb->posts}.post_title LIKE %s 
                 OR {$wpdb->posts}.post_excerpt LIKE %s
                 OR {$wpdb->posts}.post_content LIKE %s
+                OR REPLACE(REPLACE(REPLACE({$wpdb->posts}.post_title, '/', ''), '-', ''), ' ', '') LIKE %s
                   )
             "
             /* Los siguientes argumentos son los que tomarán los lugares de los 
              tres placeholders %s. En este caso, todos son el string $like
              (el término de búsqueda).
             */
-            ,$like, $like, $like
+            ,$like, $like, $like, $normalized_like
         );
 
         return $search;
@@ -119,5 +130,4 @@ final class SearchEngine
 }
         
         
-
 
