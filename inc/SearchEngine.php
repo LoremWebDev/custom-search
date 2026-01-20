@@ -87,6 +87,10 @@ final class SearchEngine
          *  la búsqueda. 
         */
         $like = '%' . $wpdb->esc_like($term) . '%';
+        // Normalizar término: quitar separadores (espacios, guiones, slash, etc.)
+        // para soportar búsquedas como "11520-P6" vs "11590/11520 P6".
+        $normalized_term = preg_replace('/[^A-Za-z0-9]+/', '', $term);
+        $normalized_like = '%' . $wpdb->esc_like($normalized_term) . '%';
 
         /* Con el patrón de búsqueda armado, reemplazaremos la instrucción WHERE
         del query (llamada $search). Se usa el método prepare() para asegurar que 
@@ -105,13 +109,14 @@ final class SearchEngine
             " AND ({$wpdb->posts}.post_title LIKE %s 
                 OR {$wpdb->posts}.post_excerpt LIKE %s
                 OR {$wpdb->posts}.post_content LIKE %s
+                OR REPLACE(REPLACE(REPLACE({$wpdb->posts}.post_title, '/', ''), '-', ''), ' ', '') LIKE %s
                   )
             "
             /* Los siguientes argumentos son los que tomarán los lugares de los 
              tres placeholders %s. En este caso, todos son el string $like
              (el término de búsqueda).
             */
-            ,$like, $like, $like
+            ,$like, $like, $like, $normalized_like
         );
 
         return $search;
@@ -119,5 +124,4 @@ final class SearchEngine
 }
         
         
-
 
