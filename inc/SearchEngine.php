@@ -87,6 +87,10 @@ final class SearchEngine
          *  la búsqueda. 
         */
         $like = '%' . $wpdb->esc_like($term) . '%';
+        // Normalizar término: quitar separadores (espacios, guiones, slash, etc.)
+        // para soportar búsquedas como "11520-P6" vs "11590/11520 P6".
+        $normalized_term = preg_replace('/[^A-Za-z0-9]+/', '', $term);
+        $normalized_like = '%' . $wpdb->esc_like($normalized_term) . '%';
 
         /* Normalizamos el término para ignorar separadores (espacios, guiones, /, etc.).
          * Esto permite que "11520-P6" o "11520P6" coincida con títulos como "11590/11520 P6".
