@@ -20,6 +20,7 @@ final class DisplayResults
 
         // Si el template no está, no hacer nada.
         if (! file_exists($template)) {
+            error_log('could not reach. No template');
             return $form;
         }
 

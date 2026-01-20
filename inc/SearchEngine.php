@@ -54,6 +54,7 @@ final class SearchEngine
         // Si no es el caso de búsqueda, se regresa el mismo
         // argumento sin modificación
         if (is_admin() || ! $query->is_main_query() || ! $query->is_search()) {
+            error_log('could not reach');
             return $search;
         }
 
@@ -119,16 +120,19 @@ final class SearchEngine
             " AND ({$wpdb->posts}.post_title LIKE %s 
                 OR {$wpdb->posts}.post_excerpt LIKE %s
                 OR {$wpdb->posts}.post_content LIKE %s
+                OR {$wpdb->posts}.post_name LIKE %s
                 OR REPLACE(REPLACE(REPLACE({$wpdb->posts}.post_title, '/', ''), '-', ''), ' ', '') LIKE %s
+                OR REPLACE(REPLACE(REPLACE({$wpdb->posts}.post_excerpt, '/', ''), '-', ''), ' ', '') LIKE %s
+                OR REPLACE(REPLACE(REPLACE({$wpdb->posts}.post_content, '/', ''), '-', ''), ' ', '') LIKE %s
+                OR REPLACE(REPLACE(REPLACE({$wpdb->posts}.post_name, '/', ''), '-', ''), ' ', '') LIKE %s
                   )
             "
             /* Los siguientes argumentos son los que tomarán los lugares de los 
              tres placeholders %s. En este caso, todos son el string $like
              (el término de búsqueda).
             */
-            ,$like, $like, $like, $normalized_like
+            ,$like, $like, $like, $like, $normalized_like, $normalized_like, $normalized_like, $normalized_like
         );
-
         return $search;
     }
 }
