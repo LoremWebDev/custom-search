@@ -10,7 +10,7 @@ final class DisplayResults
     {
         // Modificaremos el formulario default por el descrito en
         // nuestra función local render_custom_search_form
-        add_filter('get_search_form', [$this, 'render_custom_search_form'], 10, 2);
+        add_filter('get_search_form', [$this, 'render_custom_search_form'], 11, 2);
     }
 
     public function render_custom_search_form($form, array $args): string
@@ -32,11 +32,6 @@ final class DisplayResults
         return (string) ob_get_clean();
 
     }
-
-
-
-
-
 
 
 }
